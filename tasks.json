@@ -1,0 +1,25 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "type": "print",
+      "params": { "message": "hello" },
+      "timeout": "2s",
+      "retries": 0
+    },
+    {
+      "id": "t2",
+      "type": "download",
+      "params": { "url": "https://example.com/data.json", "dest": "/tmp/data.json" },
+      "timeout": "5s",
+      "retries": 2
+    },
+    {
+      "id": "t3",
+      "type": "calc",
+      "params": { "value": 42 },
+      "timeout": "1s",
+      "retries": 1
+    }
+  ]
+}
