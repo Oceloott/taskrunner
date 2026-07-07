@@ -1,7 +1,7 @@
 # Métriques d'exécution
 
-- Goroutines actives à la fin : 2
-- Tâches exécutées : 3
-- Tâches réussies : 0
-- Tâches en échec : 0
-- Tâches en timeout : 3
+- Goroutines actives à la fin : 3
+- Tâches exécutées : 5
+- Tâches réussies : 3
+- Tâches en échec : 1
+- Tâches en timeout : 1

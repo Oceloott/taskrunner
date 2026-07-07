@@ -14,7 +14,7 @@ run: build
 
 lint:
 	go vet ./...
-	gofmt -d .
+	@test -z "$$(gofmt -l .)" || { echo "fichiers mal formatés:"; gofmt -l .; exit 1; }
 
 fmt:
 	gofmt -w .
