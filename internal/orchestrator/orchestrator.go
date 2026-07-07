@@ -3,6 +3,8 @@ package orchestrator
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -12,6 +14,8 @@ import (
 
 const defaultTimeout = 30 * time.Second
 
+type logFunc func(format string, args ...any)
+
 func Orchestrate(ctx context.Context, tasks []task.Task, workers int, opts ...Option) (report.Report, error) {
 	cfg := OrchestratorConfig{Workers: workers}
 	for _, opt := range opts {
@@ -19,6 +23,16 @@ func Orchestrate(ctx context.Context, tasks []task.Task, workers int, opts ...Op
 	}
 	if cfg.Workers < 1 {
 		cfg.Workers = 1
+	}
+
+	var mu sync.Mutex
+	logf := func(format string, args ...any) {
+		if !cfg.Verbose {
+			return
+		}
+		mu.Lock()
+		fmt.Fprintf(os.Stderr, format+"\n", args...)
+		mu.Unlock()
 	}
 
 	results := make([]report.TaskResult, len(tasks))
@@ -41,7 +55,7 @@ func Orchestrate(ctx context.Context, tasks []task.Task, workers int, opts ...Op
 				return
 			}
 			defer func() { <-sem }()
-			results[i] = runTask(ctx, t)
+			results[i] = runTask(ctx, t, logf)
 		}(i, t)
 	}
 
@@ -49,11 +63,14 @@ func Orchestrate(ctx context.Context, tasks []task.Task, workers int, opts ...Op
 	return report.Report{Results: results}, nil
 }
 
-func runTask(ctx context.Context, t task.Task) report.TaskResult {
+func runTask(ctx context.Context, t task.Task, logf logFunc) report.TaskResult {
+	id := t.ID()
 	timeout, retries := policy(t)
 	start := time.Now()
 	status := report.StatusFailed
 	attempts := 0
+
+	logf("[start]   %s", id)
 
 	for attempts <= retries {
 		if ctx.Err() != nil {
@@ -75,10 +92,22 @@ func runTask(ctx context.Context, t task.Task) report.TaskResult {
 		} else {
 			status = report.StatusFailed
 		}
+		if attempts <= retries {
+			logf("[retry]   %s (tentative %d: %v)", id, attempts, err)
+		}
+	}
+
+	switch status {
+	case report.StatusSuccess:
+		logf("[success] %s (%d tentative(s), %s)", id, attempts, time.Since(start))
+	case report.StatusTimeout:
+		logf("[timeout] %s (%d tentative(s), %s)", id, attempts, time.Since(start))
+	default:
+		logf("[failed]  %s (%d tentative(s), %s)", id, attempts, time.Since(start))
 	}
 
 	return report.TaskResult{
-		ID:       t.ID(),
+		ID:       id,
 		Status:   status,
 		Duration: time.Since(start).String(),
 		Attempts: attempts,
