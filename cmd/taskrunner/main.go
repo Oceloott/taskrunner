@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"taskrunner/internal/metrics"
 	"taskrunner/internal/orchestrator"
 	"taskrunner/internal/task"
 )
@@ -42,5 +43,10 @@ func main() {
 	if _, err := rep.WriteTo(os.Stdout); err != nil {
 		fmt.Fprintln(os.Stderr, "erreur d'écriture du rapport:", err)
 		os.Exit(1)
+	}
+
+	content := metrics.WriteMetrics(rep.Results)
+	if err := os.WriteFile("METRICS.md", []byte(content), 0o644); err != nil {
+		fmt.Fprintln(os.Stderr, "erreur d'écriture de METRICS.md:", err)
 	}
 }
