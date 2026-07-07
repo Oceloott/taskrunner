@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
+
+	"taskrunner/internal/orchestrator"
+	"taskrunner/internal/task"
 )
 
 func main() {
@@ -18,6 +22,25 @@ func main() {
 		os.Exit(2)
 	}
 
-	// TODO: charger les tâches, appeler Orchestrate, écrire le rapport.
-	fmt.Fprintf(os.Stderr, "taskrunner: file=%s workers=%d verbose=%t\n", *file, *workers, *verbose)
+	w, err := orchestrator.ValidateWorkers(*workers)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "avertissement:", err)
+	}
+
+	tasks, err := task.Load(*file)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "erreur de chargement:", err)
+		os.Exit(1)
+	}
+
+	rep, err := orchestrator.Orchestrate(context.Background(), tasks, w, orchestrator.WithVerbose(*verbose))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "erreur d'exécution:", err)
+		os.Exit(1)
+	}
+
+	if _, err := rep.WriteTo(os.Stdout); err != nil {
+		fmt.Fprintln(os.Stderr, "erreur d'écriture du rapport:", err)
+		os.Exit(1)
+	}
 }

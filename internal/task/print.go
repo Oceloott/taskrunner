@@ -25,7 +25,7 @@ func (t *PrintTask) Execute(ctx context.Context) error {
 	}
 	out := t.out
 	if out == nil {
-		out = os.Stdout
+		out = os.Stderr
 	}
 	if _, err := fmt.Fprintln(out, t.message); err != nil {
 		return NewTaskError(CodeExec, t.id, err)

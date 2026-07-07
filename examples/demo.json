@@ -1,0 +1,39 @@
+{
+  "tasks": [
+    {
+      "id": "print1",
+      "type": "print",
+      "params": { "message": "bonjour" },
+      "timeout": "1s",
+      "retries": 0
+    },
+    {
+      "id": "calc1",
+      "type": "calc",
+      "params": { "value": 10 },
+      "timeout": "1s",
+      "retries": 0
+    },
+    {
+      "id": "fake-ok",
+      "type": "fake",
+      "params": { "behavior": "success", "delay": "50ms" },
+      "timeout": "1s",
+      "retries": 0
+    },
+    {
+      "id": "fake-fail",
+      "type": "fake",
+      "params": { "behavior": "fail", "delay": "10ms" },
+      "timeout": "1s",
+      "retries": 1
+    },
+    {
+      "id": "fake-timeout",
+      "type": "fake",
+      "params": { "behavior": "timeout" },
+      "timeout": "200ms",
+      "retries": 1
+    }
+  ]
+}
