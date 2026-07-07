@@ -2,6 +2,6 @@
 
 - Goroutines actives à la fin : 2
 - Tâches exécutées : 3
-- Tâches réussies : 2
-- Tâches en échec : 1
-- Tâches en timeout : 0
+- Tâches réussies : 0
+- Tâches en échec : 0
+- Tâches en timeout : 3

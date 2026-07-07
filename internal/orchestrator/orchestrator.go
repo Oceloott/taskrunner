@@ -87,7 +87,7 @@ func runTask(ctx context.Context, t task.Task, logf logFunc) report.TaskResult {
 			status = report.StatusSuccess
 			break
 		}
-		if errors.Is(err, context.DeadlineExceeded) {
+		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 			status = report.StatusTimeout
 		} else {
 			status = report.StatusFailed

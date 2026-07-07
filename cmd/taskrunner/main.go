@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 
 	"taskrunner/internal/metrics"
 	"taskrunner/internal/orchestrator"
@@ -34,7 +35,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	rep, err := orchestrator.Orchestrate(context.Background(), tasks, w, orchestrator.WithVerbose(*verbose))
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	rep, err := orchestrator.Orchestrate(ctx, tasks, w, orchestrator.WithVerbose(*verbose))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "erreur d'exécution:", err)
 		os.Exit(1)
